@@ -27,7 +27,9 @@ contract Auction {
         address highbid;
         bool status;
     }
-    mapping(uint256 => details) itemlist;
+    mapping(uint256 => details) public itemlist;
+
+    mapping(uint256 => mapping(address => uint256)) public Bidders;
 
     modifier onlyOwner() {
         if(msg.sender != owner) revert NotOwner(msg.sender);
@@ -59,6 +61,10 @@ contract Auction {
     checkActive(itemNumber) {
         if(bidAmount <= itemlist[itemNumber].high) revert BidTooLow();
         if(msg.value != bidAmount) revert IncorrectPayment();
+        if(itemlist[itemNumber].high>0) {
+            (bool success, ) = (itemlist[itemNumber].highbid).call{value:itemlist[itemNumber].high}("");
+            require(success, "Transaction Failed");
+        }
 
         itemlist[itemNumber].high = bidAmount;
         itemlist[itemNumber].highbid = msg.sender;
@@ -70,6 +76,7 @@ contract Auction {
     checkActive(itemNumber) {
         itemlist[itemNumber].status = false;
     }
+
 
     function checkAuctionActive(uint256 itemNumber) public view returns (bool) {
         return itemlist[itemNumber]._duration > block.timestamp && itemlist[itemNumber].status == true;

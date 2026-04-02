@@ -71,6 +71,45 @@ describe("Auction", function () {
         auction.bid(1, 50, { value: 50 }),
       ).to.be.revertedWithCustomError(auction, "BidTooLow");
     });
+
+    it("should fail Bid Amount is not higher than the last bid", async function () {
+      const { auction, Account3, otherAccount } = await loadFixture(
+        deployAuctionFixture,
+      );
+
+      await auction.connect(Account3).bid(1, 110, { value: 110 });
+      await expect(
+        auction.connect(otherAccount).bid(1, 105),
+      ).to.be.revertedWithCustomError(auction, "BidTooLow");
+    });
+
+    it("should set the necessary item details", async function () {
+      const { auction, Account3 } = await loadFixture(deployAuctionFixture);
+
+      await auction.connect(Account3).bid(1, 110, { value: 110 });
+
+      const item = await auction.itemlist(1);
+      expect(await item.highbid).to.equal(Account3);
+      expect(await item.high).to.equal(110);
+    });
+
+    it("should revert if ethers sent not equals bidAmount", async function () {
+      const { auction, Account3 } = await loadFixture(deployAuctionFixture);
+
+      await expect(
+        auction.connect(Account3).bid(1, 110, { value: 105 }),
+      ).to.be.revertedWithCustomError(auction, "IncorrectPayment");
+    });
+
+    it("should confirm if refund to previous bider was successfull", async function () {
+      const { auction, Account3, otherAccount } = await loadFixture(
+        deployAuctionFixture,
+      );
+
+      await auction.connect(Account3).bid(1, 110, { value: 110 });
+      expect(await auction.connect(otherAccount).bid(1, 115, { value: 115 })).to
+        .not.be.reverted;
+    });
   });
 
   describe("Cancel Auction", async function () {
@@ -84,7 +123,7 @@ describe("Auction", function () {
     });
 
     it("should work with correct item number", async function () {
-      const { auction, itemNumber } = await loadFixture(deployAuctionFixture);
+      const { auction } = await loadFixture(deployAuctionFixture);
 
       await auction.cancelAuction(1);
       expect(await auction.checkAuctionActive(1)).to.equal(false);

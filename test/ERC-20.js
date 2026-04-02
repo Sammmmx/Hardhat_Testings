@@ -7,7 +7,6 @@ const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 describe("ERC", function () {
   async function deployERC() {
     const [owner, otherAccount, Account3, Account4] = await ethers.getSigners();
-
     const ERC = await ethers.getContractFactory("ERC20Permit");
     const erc = await ERC.deploy();
 
