@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-//Deployed in Sepolia -> contract Address :0x0051aa77359c6662F2F62354814754b70fa1ef43
+//Deployed in Sepolia -> contract v1 Address :0x0051aa77359c6662F2F62354814754b70fa1ef43
+//                                v2 Address :0x772eAeC1C8d996f8C8B8F56E6F8485935DbA44A8
 // Custom errors
 error NotOwner(address caller);
 error ItemAlreadyExists();
@@ -28,8 +29,6 @@ contract Auction {
         bool status;
     }
     mapping(uint256 => details) public itemlist;
-
-    mapping(uint256 => mapping(address => uint256)) public Bidders;
 
     modifier onlyOwner() {
         if(msg.sender != owner) revert NotOwner(msg.sender);
