@@ -41,8 +41,8 @@ contract ERC20Permit {
     event _approve(address approver, address receiver, uint256 _amount);
 
     function Register(address member, uint256 amount) public 
-    checkAddress(member)
-    checkBalance(owner, amount) {
+    checkBalance(owner, amount) 
+    checkAddress(member) {
         require(msg.sender == owner, NotOwner(msg.sender));
         Members[owner] -= amount;
         Members[member] += amount;
